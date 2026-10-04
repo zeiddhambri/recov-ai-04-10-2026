@@ -42,6 +42,22 @@ export const createDossierSchema = z.object({
   institution: z.string().trim().max(200).optional(),
   branch: z.string().trim().max(200).optional(),
   client_code: z.string().trim().max(60).optional(),
+  tax_id: z.string().trim().max(100).nullable().optional(),
+  client_type: z.string().trim().max(100).nullable().optional(),
+  address: z.string().trim().max(500).nullable().optional(),
+  city: z.string().trim().max(100).nullable().optional(),
+  principal_amount: amount.nullable().optional(),
+  interest_amount: amount.nullable().optional(),
+  delay_days: z.coerce.number().min(0).max(10000).optional(),
+  contract_ref: z.string().trim().max(120).nullable().optional(),
+  dossier_number: z.string().trim().max(120).nullable().optional(),
+  guarantees: z.string().max(3000).nullable().optional(),
+  guarantors: z.string().max(3000).nullable().optional(),
+  judicial_status: z.string().max(2000).nullable().optional(),
+  lawyer_bailiff: z.string().max(200).nullable().optional(),
+  court: z.string().max(200).nullable().optional(),
+  documents: z.array(z.any()).optional(),
+  extracted_metadata: z.record(z.any()).optional(),
   user_id: z.string().optional(), // ignoré : l'auteur est dérivé du jeton
 });
 

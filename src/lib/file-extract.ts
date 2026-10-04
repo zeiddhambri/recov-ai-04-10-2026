@@ -6,11 +6,48 @@ import ExcelJS from 'exceljs';
 
 export type ExtractedDossier = {
   debtor_name: string;
+  tax_id?: string;
+  client_type?: 'grande_entreprise' | 'pme' | 'professionnel' | 'particulier' | string;
   debtor_email?: string;
   debtor_phone?: string;
+  address?: string;
+  city?: string;
   amount: number;
+  principal_amount?: number;
+  interest_penalties?: number;
   due_date?: string;
+  overdue_date?: string;
+  delay_days?: number;
+  portfolio?: string;
+  institution?: string;
+  branch?: string;
+  contract_ref?: string;
+  dossier_number?: string;
+  guarantees?: string;
+  guarantors?: string;
+  payment_history?: string;
+  judicial_status?: string;
+  lawyer_bailiff?: string;
+  court?: string;
+  case_number?: string;
+  notes?: string;
+  provenance?: Record<string, { sourceDoc: string; confidence: number; location?: string }>;
+  missing_critical_fields?: string[];
+  source_documents?: Array<{ name: string; size: number; type: string }>;
 };
+
+export function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const res = reader.result as string;
+      const base64 = res.split(',')[1] || '';
+      resolve(base64);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
 
 async function readPdfText(file: File): Promise<string> {
   const pdfjs: any = await import('pdfjs-dist');
@@ -57,8 +94,18 @@ function workbookToText(wb: ExcelJS.Workbook): string {
   return out;
 }
 
-export async function fileToText(file: File): Promise<{ text: string; isTabular: boolean }> {
+export async function fileToText(file: File): Promise<{ text: string; isTabular: boolean; isImage?: boolean; base64?: string; mimeType?: string }> {
   const ext = file.name.split('.').pop()?.toLowerCase() || '';
+  if (['png', 'jpg', 'jpeg', 'webp', 'bmp'].includes(ext)) {
+    const base64 = await fileToBase64(file);
+    return {
+      text: `[Document image / scan joint: ${file.name}]`,
+      isTabular: false,
+      isImage: true,
+      base64,
+      mimeType: file.type || (ext === 'png' ? 'image/png' : 'image/jpeg')
+    };
+  }
   if (ext === 'pdf') return { text: await readPdfText(file), isTabular: false };
   if (ext === 'docx') {
     const buf = await file.arrayBuffer();

@@ -32,6 +32,12 @@
 
   --color-navy: hsl(var(--navy));
   --color-charcoal: hsl(var(--charcoal));
+  --color-sky: hsl(var(--sky));
+  --color-sky-light: hsl(var(--sky-light));
+  --color-gold: hsl(var(--gold));
+  --color-crimson: hsl(var(--crimson));
+  --color-mist: hsl(var(--mist));
+  --color-cobalt: hsl(var(--cobalt));
   
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);

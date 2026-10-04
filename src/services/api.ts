@@ -82,6 +82,8 @@ export const api = {
       if (!res.ok) throw new Error('Suppression refusée (réservé aux rôles directeur/admin).');
       return res.json();
     },
+    aiExtract: async (payload: { documents: Array<{ name: string; type?: string; size?: number; text?: string; base64?: string; mimeType?: string }>; instruction?: string }) =>
+      postJson('/api/dossiers/ai-extract', payload),
     recordAction: async (id: string, action: any) => postJson(`/api/dossiers/${id}/actions`, action)
   },
 

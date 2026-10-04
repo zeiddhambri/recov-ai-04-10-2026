@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+import { GoogleGenAI } from '@google/genai';
 import { db } from '../db/dataStore';
 import { requireRole } from '../auth';
 import { validate, createDossierSchema, updateDossierSchema } from '../validation';
@@ -104,7 +105,13 @@ router.get('/:id', async (req: Request, res: Response) => {
 // POST create new dossier
 router.post('/', validate(createDossierSchema), async (req: Request, res: Response) => {
   try {
-    const { debtor_name, amount, debtor_email, debtor_phone, due_date, assigned_to, management_level, status, notes, portfolio, institution, branch } = req.body;
+    const {
+      debtor_name, amount, debtor_email, debtor_phone, due_date, assigned_to,
+      management_level, status, notes, portfolio, institution, branch,
+      tax_id, client_type, address, city, principal_amount, interest_amount,
+      delay_days, contract_ref, dossier_number, guarantees, guarantors,
+      judicial_status, lawyer_bailiff, court, documents, extracted_metadata
+    } = req.body;
     const year = new Date().getFullYear();
     const randomSuffix = Math.floor(Math.random() * 9000 + 1000);
     const actor = actorOf(req);
@@ -126,7 +133,22 @@ router.post('/', validate(createDossierSchema), async (req: Request, res: Respon
       institution: actor.institution || institution || null,
       branch: branch || 'Tunis',
       risk_level: amountNum > 100000 ? 'Critique' : amountNum > 30000 ? 'Élevé' : 'Moyen',
-      delay_days: 30,
+      delay_days: typeof delay_days === 'number' ? delay_days : 30,
+      tax_id: tax_id || null,
+      client_type: client_type || null,
+      address: address || null,
+      city: city || null,
+      principal_amount: principal_amount !== undefined ? Number(principal_amount) : null,
+      interest_amount: interest_amount !== undefined ? Number(interest_amount) : null,
+      contract_ref: contract_ref || null,
+      dossier_number: dossier_number || null,
+      guarantees: guarantees || null,
+      guarantors: guarantors || null,
+      judicial_status: judicial_status || null,
+      lawyer_bailiff: lawyer_bailiff || null,
+      court: court || null,
+      documents: documents || [],
+      extracted_metadata: extracted_metadata || null,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
@@ -304,6 +326,130 @@ router.post('/reset-demo', async (req: Request, res: Response) => {
   } catch (e: any) {
     console.error('[dossiers.reset-demo]', e?.message);
     res.status(500).json({ error: 'Échec de la réinitialisation des données de démo' });
+  }
+});
+
+// POST /api/dossiers/ai-extract — Extraction intelligente de données via IA (Gemini 3.8 Flash)
+router.post('/ai-extract', async (req: Request, res: Response) => {
+  try {
+    const actor = actorOf(req);
+    const { documents = [], instruction } = req.body;
+
+    if (!Array.isArray(documents) || documents.length === 0) {
+      return res.status(400).json({ error: 'Au moins un document (PDF, Word, Excel ou image) est requis pour l\'analyse IA.' });
+    }
+
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      return res.status(500).json({ error: 'Clé d\'API IA non configurée (GEMINI_API_KEY).' });
+    }
+
+    const ai = new GoogleGenAI({ apiKey });
+
+    const textContentParts: string[] = [];
+    const inlineDataParts: any[] = [];
+
+    textContentParts.push(`Tu es un Expert Juridique et Financier Senior Spécialisé en Recouvrement Bancaire en Tunisie (Amen Bank, Tunisie Leasing, Enda Tamweel, etc.).
+Tu analyses rigoureusement les pièces justificatives d'un dossier de recouvrement (contrats de crédit/leasing/factoring, factures impayées, tableaux d'amortissement, relevés bancaires, mises en demeure, exploits d'huissier, assignations judiciaires, pièces d'identité, garanties, etc.).
+
+OBJECTIF : Extraire toutes les informations pertinentes permettant de constituer un dossier de recouvrement complet, prêt pour contrôle et validation humaine obligatoire.
+
+RÈGLE D'OR : N'INVENTE STRICTEMENT RIEN.
+- Si une information n'apparaît pas ou ne peut être déduite avec certitude des pièces fournies, laisse la valeur à null ou chaîne vide "".
+- N'invente pas de numéro de téléphone, d'adresse email, de matricule fiscal ni de montant s'ils ne sont pas présents dans les documents.
+- Pour chaque champ extrait, indique le document source ("sourceDoc") et un score de confiance ("confidence" entre 0 et 100).
+- Identifie les champs critiques manquants dans "missing_critical_fields" pour signaler la vérification humaine requise.
+
+Voici les documents fournis par l'utilisateur (${documents.length} document(s)) :`);
+
+    for (const doc of documents) {
+      textContentParts.push(`\n=== FICHIER SOURCE : "${doc.name}" (Type: ${doc.type || 'Non spécifié'}) ===`);
+      if (doc.text && typeof doc.text === 'string' && doc.text.trim()) {
+        textContentParts.push(`Contenu textuel extrait :\n${doc.text.slice(0, 35000)}`);
+      }
+      if (doc.base64 && typeof doc.base64 === 'string' && doc.mimeType) {
+        inlineDataParts.push({
+          inlineData: {
+            mimeType: doc.mimeType,
+            data: doc.base64
+          }
+        });
+      }
+    }
+
+    textContentParts.push(`\nConsignes complémentaires : ${instruction || 'Extraction complète et rigoureuse'}.
+
+Réponds STRICTEMENT par un objet JSON respectant cette structure exacte :
+{
+  "debtor_name": "Raison sociale ou nom complet du débiteur (ou null si non trouvé)",
+  "tax_id": "Matricule fiscal (MF) ou CIN ou RC (ou null si non trouvé)",
+  "client_type": "grande_entreprise" | "pme" | "professionnel" | "particulier" | null,
+  "debtor_email": "Email de contact du débiteur ou null",
+  "debtor_phone": "Numéro de téléphone formaté (+216 ...) ou null",
+  "address": "Adresse complète ou siège social ou null",
+  "city": "Ville (Tunis, Sousse, Sfax, etc.) ou null",
+  "amount": <montant total de la créance en TND en nombre, ou 0>,
+  "principal_amount": <montant principal dû en TND en nombre, ou null>,
+  "interest_penalties": <intérêts moratoires / pénalités en TND en nombre, ou null>,
+  "due_date": "Date d'échéance principale AAAA-MM-JJ ou null",
+  "overdue_date": "Date du premier impayé / déchéance AAAA-MM-JJ ou null",
+  "delay_days": <jours de retard en nombre, ou 0>,
+  "portfolio": "Factoring" | "Leasing" | "Microfinance" | "Commercial" | "Amiable",
+  "institution": "Nom de la banque ou créancier (ex: Amen Bank, Tunisie Leasing, Enda Tamweel) ou null",
+  "branch": "Agence bancaire ou succursale ou null",
+  "contract_ref": "Référence contrat de prêt / leasing / factoring ou facture ou null",
+  "dossier_number": "Numéro de compte ou référence dossier interne ou null",
+  "guarantees": "Garanties réelles ou financières (hypothèque, gage, nantissement, etc.) ou null",
+  "guarantors": "Cautions personnelles et solidaires identifiées (nom, engagement) ou null",
+  "payment_history": "Historique des règlements ou derniers acomptes ou null",
+  "judicial_status": "Stade de la procédure (amiable, mise en demeure envoyée, injonction déposée, etc.) ou null",
+  "lawyer_bailiff": "Avocat mandaté ou huissier instrumentaire ou null",
+  "court": "Tribunal ou juridiction compétente ou null",
+  "case_number": "Numéro d'affaire judiciaire ou null",
+  "notes": "Synthèse contextuelle des motifs de l'impayé et des faits clés constatés dans les pièces",
+  "provenance": {
+    "debtor_name": { "sourceDoc": "nom_du_fichier", "confidence": 95 },
+    "amount": { "sourceDoc": "nom_du_fichier", "confidence": 98 }
+  },
+  "missing_critical_fields": [
+    "Nom du champ important non identifié nécessitant vérification humaine"
+  ]
+}`);
+
+    const parts: any[] = [{ text: textContentParts.join('\n') }, ...inlineDataParts];
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-3.8-flash',
+      contents: parts,
+      config: {
+        responseMimeType: 'application/json'
+      }
+    });
+
+    const parsedJson = JSON.parse(response.text || '{}');
+
+    await getRepository().appendAudit({
+      action: 'AI_DOSSIER_EXTRACTION',
+      details: `Extraction IA réussie pour ${documents.length} document(s) (Débiteur détecté : ${parsedJson.debtor_name || 'Non identifié'})`,
+      actorEmail: actor.email,
+      actorRole: actor.role,
+      actorId: actor.sub,
+      entityType: 'dossier',
+      meta: { docNames: documents.map((d: any) => d.name) }
+    });
+
+    res.json({
+      success: true,
+      extracted: parsedJson,
+      documentsAnalyzed: documents.map((d: any) => ({ name: d.name, type: d.type, size: d.size })),
+      timestamp: new Date().toISOString()
+    });
+  } catch (e: any) {
+    console.error('[dossiers.ai-extract]', e?.message);
+    res.status(500).json({
+      error: 'Erreur lors de l\'analyse IA des documents.',
+      details: e?.message
+    });
   }
 });
 
