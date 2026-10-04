@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  quality:
+    name: Lint · Types · Tests · Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - name: Typecheck serveur (strict)
+        run: npx tsc --noEmit -p tsconfig.server.json
+      - name: Tests unitaires + intégration (store JSON)
+        run: npm run test
+      - name: Build client + bundle serveur
+        run: npm run build
+      - name: Audit SCA des dépendances runtime (non bloquant v1)
+        run: npm audit --omit=dev --audit-level=high
+        continue-on-error: true
+      - name: SBOM (CycloneDX)
+        run: npx @cyclonedx/cyclonedx-npm --output-file sbom.json --omit dev
+      - uses: actions/upload-artifact@v4
+        with: { name: sbom, path: sbom.json }
+
+  integration-postgres:
+    name: Intégration Postgres (RLS, audit append-only)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env: { POSTGRES_USER: recovai, POSTGRES_PASSWORD: recovai_test, POSTGRES_DB: recovai }
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U recovai" --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - name: Appliquer les migrations (script node — psql absent des runners)
+        run: node scripts/migrate-pg.mjs
+        env:
+          DATABASE_URL: postgres://recovai:recovai_test@localhost:5432/recovai
+      - name: Tests d'intégration PgRepo
+        run: npm run test:pg
+        env:
+          DATABASE_URL: postgres://recovai:recovai_test@localhost:5432/recovai

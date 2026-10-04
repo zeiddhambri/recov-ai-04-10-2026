@@ -1,0 +1,34 @@
+# Environnement complet local/pré-prod : app + Postgres.
+# La persistance de l'application est activée via DATABASE_URL (lot P1).
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: recovai
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-recovai_dev_only}
+      POSTGRES_DB: recovai
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./server/db/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U recovai']
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  app:
+    build: .
+    depends_on:
+      db: { condition: service_healthy }
+    environment:
+      # Rôle applicatif NON privilégié (créé par la migration) : la RLS s'applique vraiment.
+      DATABASE_URL: postgres://recovai_app:${APP_DB_PASSWORD:-change_me_in_deployment}@db:5432/recovai
+      APP_AUTH_SECRET: ${APP_AUTH_SECRET:?définir un secret de 32+ caractères}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      AI_REDACT: ${AI_REDACT:-on}
+    ports:
+      - '3000:3000'
+
+volumes:
+  pgdata:

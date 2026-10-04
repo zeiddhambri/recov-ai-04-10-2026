@@ -1,0 +1,499 @@
+openapi: 3.1.0
+info:
+  title: RecovAI API
+  version: 1.3.0
+  description: |
+    API du backend RecovAI (recouvrement, contentieux, risque crédit) pour banques,
+    sociétés de leasing/factoring et institutions de microfinance.
+
+    **Authentification** : `Authorization: Bearer <jeton>` obtenu via `POST /api/auth/login`
+    (P1.7 : access 15 min + refresh 7j tournant, MFA TOTP) ou via un jeton Supabase quand la voie SSO est activée.
+    Si MFA actif : login en 2 étapes → `mfaRequired:true` → `POST /api/auth/login/mfa`.
+
+    **Cloisonnement (P1)** : un compte rattaché à une institution (`institution` claim) ne
+    voit et n'écrit que dans le portefeuille de son institution ; les comptes transverses
+    (administration) voient l'ensemble.
+
+    **Traçabilité** : toute écriture est journalisée (auteur, horodatage, différentiel
+    avant/après, chaînage SHA-256) dans le journal d'audit append-only.
+
+    **P1.5** : connecteurs SMS/Email/WhatsApp réels avec webhooks HMAC, `proof.hash` opposable, `statusHistory`.
+
+    **P1.7** : MFA TOTP RFC 6238, lockout 5 échecs → 423, SSO OIDC/SAML stub + SCIM.
+servers:
+  - url: /api
+tags:
+  - name: auth
+  - name: dossiers
+  - name: audit
+  - name: export
+  - name: portfolios
+  - name: contentieux
+  - name: relances
+  - name: risk
+  - name: system
+
+paths:
+  /auth/login:
+    post:
+      tags: [auth]
+      summary: Obtenir un jeton d'accès
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, minLength: 1 }
+      responses:
+        '200':
+          description: Jeton émis
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token: { type: string }
+                  expiresAt: { type: integer, format: int64 }
+                  user:
+                    $ref: '#/components/schemas/User'
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '429': { $ref: '#/components/responses/RateLimited' }
+
+  /auth/me:
+    get:
+      tags: [auth]
+      summary: Session courante
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Profil de la session
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user: { $ref: '#/components/schemas/User' }
+
+  /dossiers:
+    get:
+      tags: [dossiers]
+      summary: Lister les dossiers (paginé, filtré, cloisonné)
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: status, in: query, schema: { type: string, enum: [a_relancer, en_relance, promesse_paiement, partiellement_paye, paye, contentieux, all] } }
+        - { name: management_level, in: query, schema: { type: string, enum: [recouvreur, superviseur, directeur, comite, contentieux, all] } }
+        - { name: portfolio, in: query, schema: { type: string } }
+        - { name: search, in: query, schema: { type: string }, description: 'Nom, référence, téléphone ou e-mail du débiteur' }
+        - { name: limit, in: query, schema: { type: integer, minimum: 1, maximum: 1000, default: 100 } }
+        - { name: offset, in: query, schema: { type: integer, minimum: 0, default: 0 } }
+      responses:
+        '200':
+          description: Page de dossiers
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DossierPage' }
+    post:
+      tags: [dossiers]
+      summary: Créer un dossier (journalisé)
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DossierCreate' }
+      responses:
+        '201':
+          description: Dossier créé
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Dossier' }
+        '400': { $ref: '#/components/responses/ValidationError' }
+
+  /dossiers/{id}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string }, description: id ou client_code }
+    get:
+      tags: [dossiers]
+      summary: Détail d'un dossier (avec historique d'actions)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Dossier
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Dossier' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      tags: [dossiers]
+      summary: 'Mettre à jour (verrou optimiste : version ou If-Match)'
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: If-Match, in: header, schema: { type: string }, description: 'version attendue, ex. 3' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DossierUpdate' }
+      responses:
+        '200':
+          description: Dossier mis à jour
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Dossier' }
+        '409':
+          description: Conflit de version
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error: { type: string }
+                  code: { type: string, example: VERSION_CONFLICT }
+                  currentVersion: { type: integer }
+    delete:
+      tags: [dossiers]
+      summary: Suppression logique (réservé manager/admin)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: Dossier marqué supprimé (soft-delete) }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /dossiers/{id}/actions:
+    post:
+      tags: [dossiers]
+      summary: Enregistrer une action (appel, visite, promesse, paiement)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '201': { description: Action enregistrée }
+
+  /dossiers/stats/summary:
+    get:
+      tags: [dossiers]
+      summary: Statistiques consolidées du périmètre
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: KPIs }
+
+  /audit:
+    get:
+      tags: [audit]
+      summary: Journal d'audit (manager/admin) — export CSV possible
+      security: [{ bearerAuth: [] }]
+      parameters:
+        - { name: limit, in: query, schema: { type: integer, default: 200, maximum: 10000 } }
+        - { name: format, in: query, schema: { type: string, enum: [json, csv] } }
+      responses:
+        '200': { description: Entrées du journal }
+        '403': { $ref: '#/components/responses/Forbidden' }
+
+  /export/dossiers.csv:
+    get:
+      tags: [export]
+      summary: Export batch CSV (séparateur point-virgule, prêt pour échanges SFTP)
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Fichier plat
+          content:
+            text/csv: { schema: { type: string } }
+
+  /export/dossiers.json:
+    get:
+      tags: [export]
+      summary: Export batch JSON horodaté avec périmètre
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200': { description: Document JSON }
+
+  /portefeuilles/leasing:
+    get:
+      tags: [portfolios]
+      summary: Portefeuille leasing (pagination à venir — réponse exhaustive en v1.1)
+      security: [{ bearerAuth: [] }]
+      responses: { '200': { description: Contrats } }
+
+  /contentieux/dossiers:
+    get:
+      tags: [contentieux]
+      summary: Dossiers contentieux
+      security: [{ bearerAuth: [] }]
+      responses: { '200': { description: Dossiers } }
+    post:
+      tags: [contentieux]
+      summary: Ouvrir un dossier contentieux
+      security: [{ bearerAuth: [] }]
+      responses: { '201': { description: Créé }, '400': { $ref: '#/components/responses/ValidationError' } }
+
+  /relances/send:
+    post:
+      tags: [relances]
+      summary: 'Envoyer une relance via provider réel (P1.5) — preuve opposable + statusHistory'
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                dossierId: { type: string }
+                channel: { type: string, enum: [sms, email, whatsapp, appel, lettre] }
+                templateId: { type: string }
+                customMessage: { type: string }
+                recipient: { type: string }
+      responses:
+        '201': { description: Relance envoyée (queued/sent) avec providerMessageId }
+        '502': { description: Échec provider }
+
+  /relances/providers/status:
+    get:
+      tags: [relances]
+      summary: 'Statut des providers SMS/Email/WhatsApp (P1.5)'
+      security: [{ bearerAuth: [] }]
+      responses: { '200': { description: Config provider + webhook endpoints } }
+
+  /relances/logs/{id}:
+    get:
+      tags: [relances]
+      summary: 'Détail log relance avec statusHistory et proof.hash (P1.5)'
+      security: [{ bearerAuth: [] }]
+      parameters: [{ name: id, in: path, required: true, schema: { type: string } }]
+      responses: { '200': { description: Log détaillé }, '404': { $ref: '#/components/responses/NotFound' } }
+
+  /relances/webhooks/sms:
+    post:
+      tags: [relances]
+      summary: 'Webhook SMS — statut réel depuis agrégateur (P1.5, HMAC)'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                providerMessageId: { type: string }
+                status: { type: string, enum: [queued, sent, delivered, failed, bounced, rejected] }
+                timestamp: { type: string, format: date-time }
+      responses: { '200': { description: Webhook traité }, '401': { description: Signature invalide } }
+
+  /relances/webhooks/email:
+    post:
+      tags: [relances]
+      summary: 'Webhook Email (Sendgrid/Mailgun/SMTP) — P1.5'
+      responses: { '200': { description: OK } }
+
+  /relances/webhooks/whatsapp:
+    post:
+      tags: [relances]
+      summary: 'Webhook WhatsApp — P1.5'
+      responses: { '200': { description: OK } }
+
+  /credit-ifrs9/calculate-ecl:
+    post:
+      tags: [risk]
+      summary: 'Calcul ECL IFRS 9 déterministe (PD/LGD/haircut/scénarios) — aide à la décision uniquement'
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: Résultat détaillé et reproductible
+        '400': { $ref: '#/components/responses/ValidationError' }
+
+  /auth/login/mfa:
+    post:
+      tags: [auth]
+      summary: 'Second step MFA TOTP (P1.7) — après login password'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, mfaCode]
+              properties:
+                email: { type: string, format: email }
+                mfaCode: { type: string, description: '6 chiffres TOTP ou 8 chars backup' }
+                mfaToken: { type: string, description: 'Token temporaire 5 min émis par /login' }
+      responses:
+        '200': { description: Token final 15 min + refresh 7j }
+        '401': { description: MFA invalide }
+        '423': { description: Compte verrouillé (lockout) }
+
+  /auth/mfa/setup:
+    post:
+      tags: [auth]
+      summary: 'Initialiser MFA TOTP (P1.7) — génère secret + QR + backup codes'
+      security: [{ bearerAuth: [] }]
+      responses: { '200': { description: secret + otpauthUri + backupCodes } }
+
+  /auth/mfa/verify:
+    post:
+      tags: [auth]
+      summary: 'Vérifier code TOTP et activer MFA (P1.7)'
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [code]
+              properties:
+                code: { type: string }
+      responses: { '200': { description: MFA activé + nouveau token mfaVerified } }
+
+  /auth/mfa/status:
+    get:
+      tags: [auth]
+      summary: 'Statut MFA du compte courant (P1.7)'
+      security: [{ bearerAuth: [] }]
+      responses: { '200': { description: enabled, backupCodes, totpRemainingSeconds } }
+
+  /auth/mfa/refresh:
+    post:
+      tags: [auth]
+      summary: 'Refresh tournant — rotation refresh token + nouveau access (P1.7)'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken: { type: string }
+      responses: { '200': { description: Nouveau token + nouveau refresh (ancien révoqué) } }
+
+  /auth/mfa/sessions:
+    get:
+      tags: [auth]
+      summary: 'Lister sessions actives (refresh tokens) — P1.7'
+      security: [{ bearerAuth: [] }]
+      responses: { '200': { description: Liste sessions } }
+
+  /auth/mfa/logout:
+    post:
+      tags: [auth]
+      summary: 'Déconnexion + révocation refresh (P1.7) — ?all=1 pour globale'
+      security: [{ bearerAuth: [] }]
+      responses: { '200': { description: Déconnecté } }
+
+  /auth/oidc/.well-known/openid-configuration:
+    get:
+      tags: [auth]
+      summary: 'Découverte OIDC — stub P1.7 prêt pour Entra ID'
+      responses: { '200': { description: Config OIDC RP } }
+
+  /auth/sso/policy:
+    get:
+      tags: [auth]
+      summary: 'Politique SSO/MFA/session (P1.7)'
+      responses: { '200': { description: Politique } }
+
+  /health:
+    get:
+      tags: [system]
+      summary: Sonde de vie (aucune information interne exposée)
+      responses:
+        '200': { description: ok }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    Unauthorized: { description: Jeton absent/invalide/expiré }
+    Forbidden: { description: Privilèges insuffisants }
+    NotFound: { description: Ressource introuvable }
+    RateLimited: { description: Limite de débit atteinte }
+    ValidationError:
+      description: Payload invalide
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error: { type: string }
+              code: { type: string, example: VALIDATION_ERROR }
+              details:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    path: { type: string }
+                    message: { type: string }
+  schemas:
+    User:
+      type: object
+      properties:
+        id: { type: string }
+        email: { type: string, format: email }
+        name: { type: string }
+        role: { type: string, enum: [admin, manager, agent] }
+        institution: { type: [string, 'null'] }
+    Dossier:
+      type: object
+      properties:
+        id: { type: string }
+        client_code: { type: string }
+        institution: { type: [string, 'null'] }
+        branch: { type: [string, 'null'] }
+        portfolio: { type: [string, 'null'] }
+        debtor_name: { type: string }
+        debtor_email: { type: [string, 'null'] }
+        debtor_phone: { type: [string, 'null'] }
+        amount: { type: number }
+        recovered_amount: { type: number }
+        status: { type: string }
+        management_level: { type: string }
+        assigned_to: { type: string }
+        risk_level: { type: string }
+        delay_days: { type: integer }
+        due_date: { type: [string, 'null'], format: date }
+        notes: { type: string }
+        version: { type: integer, description: Verrou optimiste }
+        created_by: { type: string }
+        updated_by: { type: string }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        deleted_at: { type: [string, 'null'], format: date-time }
+    DossierCreate:
+      type: object
+      required: [debtor_name]
+      properties:
+        debtor_name: { type: string, minLength: 2, maxLength: 255 }
+        amount: { type: number, minimum: 0 }
+        debtor_email: { type: [string, 'null'], format: email }
+        debtor_phone: { type: [string, 'null'] }
+        due_date: { type: [string, 'null'], format: date }
+        assigned_to: { type: string }
+        management_level: { type: string, enum: [recouvreur, superviseur, directeur, comite, contentieux] }
+        status: { type: string, enum: [a_relancer, en_relance, promesse_paiement, partiellement_paye, paye, contentieux] }
+        notes: { type: string, maxLength: 5000 }
+        portfolio: { type: string }
+        institution: { type: [string, 'null'] }
+        branch: { type: string }
+        client_code: { type: string }
+    DossierUpdate:
+      type: object
+      description: 'Tout champ de DossierCreate, plus version (optionnelle) pour le verrou optimiste.'
+      additionalProperties: true
+    DossierPage:
+      type: object
+      properties:
+        count: { type: integer, description: Total filtré hors pagination }
+        limit: { type: integer }
+        offset: { type: integer }
+        hasMore: { type: boolean }
+        scope:
+          type: object
+          properties:
+            institution: { type: [string, 'null'] }
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/Dossier' }

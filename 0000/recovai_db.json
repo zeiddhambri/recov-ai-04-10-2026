@@ -1,0 +1,934 @@
+{
+  "dossiers": [
+    {
+      "id": "1",
+      "user_id": "dummy-user-id",
+      "client_code": "RCV-2024-001",
+      "debtor_name": "DEBITEUR ALPHA DEMO",
+      "debtor_email": "contact@demo-sarl.example.test",
+      "debtor_phone": "+216 30 000 000",
+      "amount": 145000,
+      "recovered_amount": 35000,
+      "status": "en_relance",
+      "management_level": "directeur",
+      "assigned_to": "Agent Démo 1",
+      "due_date": "2024-03-15",
+      "portfolio": "Factoring",
+      "institution": "Amen Bank",
+      "branch": "Tunis Belvédère",
+      "risk_level": "Critique",
+      "delay_days": 95,
+      "notes": "Mise en demeure envoyée. Débiteur joignable sur le portable du gérant.",
+      "created_at": "2024-01-15T10:00:00Z",
+      "updated_at": "2026-05-20T14:30:00Z"
+    },
+    {
+      "id": "2",
+      "user_id": "dummy-user-id",
+      "client_code": "RCV-2024-002",
+      "debtor_name": "PARTICULIER DEMO 01",
+      "debtor_email": "particulier.demo@example.test",
+      "debtor_phone": "+216 30 000 000",
+      "amount": 22000,
+      "recovered_amount": 5000,
+      "status": "contentieux",
+      "management_level": "comite",
+      "assigned_to": "Agent Démo 2",
+      "due_date": "2024-03-14",
+      "portfolio": "Leasing",
+      "institution": "Tunisie Leasing",
+      "branch": "Sousse Corniche",
+      "risk_level": "Moyen",
+      "delay_days": 200,
+      "notes": "Jugement rendu, exécution sur véhicule en cours.",
+      "created_at": "2024-01-20T09:00:00Z",
+      "updated_at": "2026-05-18T11:20:00Z"
+    },
+    {
+      "id": "3",
+      "user_id": "dummy-user-id",
+      "client_code": "RCV-2024-003",
+      "debtor_name": "TECH GLOBAL DEMO",
+      "debtor_email": "finances@tech-global.example.test",
+      "debtor_phone": "+216 30 000 000",
+      "amount": 890000,
+      "recovered_amount": 90000,
+      "status": "a_relancer",
+      "management_level": "recouvreur",
+      "assigned_to": "Agent Démo 3",
+      "due_date": "2024-03-13",
+      "portfolio": "Factoring",
+      "institution": "Amen Bank",
+      "branch": "Lac Tunis",
+      "risk_level": "Élevé",
+      "delay_days": 45,
+      "notes": "Gros compte client. En attente de déblocage d’une situation de marché public.",
+      "created_at": "2024-02-01T08:30:00Z",
+      "updated_at": "2026-05-25T16:00:00Z"
+    },
+    {
+      "id": "4",
+      "user_id": "dummy-user-id",
+      "client_code": "RCV-2024-004",
+      "debtor_name": "ENTREPRISE K DEMO",
+      "debtor_email": "contact@entreprise-k.example.test",
+      "debtor_phone": "+216 30 000 000",
+      "amount": 56000,
+      "recovered_amount": 56000,
+      "status": "paye",
+      "management_level": "directeur",
+      "assigned_to": "Agent Démo 1",
+      "due_date": "2024-03-12",
+      "portfolio": "Microfinance",
+      "institution": "Enda Tamweel",
+      "branch": "Sfax El Jadida",
+      "risk_level": "Faible",
+      "delay_days": 0,
+      "notes": "Paiement intégral soldé par virement irrévocable.",
+      "created_at": "2024-02-10T11:15:00Z",
+      "updated_at": "2026-05-10T09:45:00Z"
+    },
+    {
+      "id": "5",
+      "user_id": "dummy-user-id",
+      "client_code": "RCV-2024-005",
+      "debtor_name": "FONDS MARINA DEMO",
+      "debtor_email": "invest@marina-demo.example.test",
+      "debtor_phone": "+216 30 000 000",
+      "amount": 320000,
+      "recovered_amount": 45000,
+      "status": "promesse_paiement",
+      "management_level": "recouvreur",
+      "assigned_to": "Agent Démo 3",
+      "due_date": "2024-03-11",
+      "portfolio": "Leasing",
+      "institution": "Tunisie Leasing",
+      "branch": "Tunis Centre",
+      "risk_level": "Élevé",
+      "delay_days": 75,
+      "notes": "Promesse de virement de 50 000 TND pour fin de mois validée.",
+      "created_at": "2024-02-15T14:00:00Z",
+      "updated_at": "2026-05-28T10:30:00Z"
+    },
+    {
+      "id": "6",
+      "user_id": "dummy-user-id",
+      "client_code": "RCV-2024-006",
+      "debtor_name": "TRANSIT AERIEN DEMO SARL",
+      "debtor_email": "recouvrement@transit-aerien.example.test",
+      "debtor_phone": "+216 30 000 000",
+      "amount": 78000,
+      "recovered_amount": 15000,
+      "status": "en_relance",
+      "management_level": "directeur",
+      "assigned_to": "Agent Démo 2",
+      "due_date": "2024-03-10",
+      "portfolio": "Microfinance",
+      "institution": "Enda Tamweel",
+      "branch": "Tunis Centre",
+      "risk_level": "Moyen",
+      "delay_days": 110,
+      "notes": "Relance téléphonique effectuée, attente visa de la direction comptable.",
+      "created_at": "2024-03-01T10:00:00Z",
+      "updated_at": "2026-05-22T13:00:00Z"
+    },
+    {
+      "id": "7",
+      "user_id": "dummy-user-id",
+      "client_code": "RCV-2024-007",
+      "debtor_name": "CIMENTS DEMO SA",
+      "debtor_email": "finance@ciments-demo.example.test",
+      "debtor_phone": "+216 30 000 000",
+      "amount": 1200000,
+      "recovered_amount": 250000,
+      "status": "contentieux",
+      "management_level": "comite",
+      "assigned_to": "Agent Démo 1",
+      "due_date": "2024-03-09",
+      "portfolio": "Factoring",
+      "institution": "Amen Bank",
+      "branch": "Tunis Belvédère",
+      "risk_level": "Critique",
+      "delay_days": 180,
+      "notes": "Dossier transmis au cabinet d’avocat. Procédure d’injonction engagée.",
+      "created_at": "2024-01-05T09:00:00Z",
+      "updated_at": "2026-05-29T15:00:00Z"
+    }
+  ],
+  "leasing": [
+    {
+      "id": "LSG-2024-001",
+      "contract_ref": "LSG-2024-001",
+      "lessee": {
+        "id": "LES-01",
+        "name": "SOCIETE FONDS MARINA DEMO",
+        "siren": "1122334455",
+        "contact": "M. Contact Demo 3",
+        "phone": "+216 30 000 000",
+        "email": "invest@marina-demo.example.test",
+        "address": "3 Avenue de Carthage",
+        "city": "Tunis",
+        "zip": "1001"
+      },
+      "asset": {
+        "type": "industrial",
+        "description": "Centre d'usinage numérique 5 axes",
+        "brand": "DMG Mori",
+        "model": "DMU 50",
+        "acquisitionValue": 320000,
+        "residualValue": 32000
+      },
+      "financials": {
+        "monthlyRent": 6850,
+        "interestRate": 8.5,
+        "deposit": 32000,
+        "totalFinanced": 320000,
+        "remainingCapital": 215000,
+        "overdueAmount": 20550,
+        "overdueDays": 75
+      },
+      "status": "late",
+      "portfolio": "Leasing",
+      "institution": "Tunisie Leasing",
+      "branch": "Tunis Centre",
+      "startDate": "2023-06-01",
+      "maturityDate": "2027-06-01",
+      "durationMonths": 48,
+      "insuranceActive": true,
+      "riskLevel": "Élevé",
+      "created_at": "2023-06-01T00:00:00Z"
+    },
+    {
+      "id": "LSG-2024-002",
+      "contract_ref": "LSG-2024-002",
+      "lessee": {
+        "id": "LES-02",
+        "name": "PARTICULIER DEMO 01",
+        "contact": "M. Ahmed Ben Salem",
+        "phone": "+216 30 000 000",
+        "email": "particulier.demo@example.test",
+        "address": "4 Avenue Habib Bourguiba",
+        "city": "Sousse",
+        "zip": "4000"
+      },
+      "asset": {
+        "type": "vehicle",
+        "description": "Tracteur Routier Mercedes-Benz Actros",
+        "brand": "Mercedes-Benz",
+        "model": "Actros 1845",
+        "acquisitionValue": 185000,
+        "residualValue": 18500
+      },
+      "financials": {
+        "monthlyRent": 4200,
+        "interestRate": 8.2,
+        "deposit": 18500,
+        "totalFinanced": 185000,
+        "remainingCapital": 98000,
+        "overdueAmount": 22000,
+        "overdueDays": 120
+      },
+      "status": "litigation",
+      "portfolio": "Leasing",
+      "institution": "Tunisie Leasing",
+      "branch": "Sousse Corniche",
+      "startDate": "2022-10-15",
+      "maturityDate": "2026-10-15",
+      "durationMonths": 48,
+      "insuranceActive": true,
+      "riskLevel": "Critique",
+      "created_at": "2022-10-15T00:00:00Z"
+    },
+    {
+      "id": "LSG-2024-003",
+      "contract_ref": "LSG-2024-003",
+      "lessee": {
+        "id": "LES-03",
+        "name": "CLINIQUE ATLAS DEMO",
+        "siren": "9988776655",
+        "contact": "Dr. Contact Demo 4",
+        "phone": "+216 30 000 000",
+        "email": "direction@clinique-atlas-demo.example.test",
+        "address": "Rue de la Clinique, Ennasr",
+        "city": "Ariana",
+        "zip": "2037"
+      },
+      "asset": {
+        "type": "equipment",
+        "description": "Système d'imagerie IRM 1.5 Tesla",
+        "brand": "Siemens Healthineers",
+        "model": "MAGNETOM Altea",
+        "acquisitionValue": 850000,
+        "residualValue": 85000
+      },
+      "financials": {
+        "monthlyRent": 17800,
+        "interestRate": 7.9,
+        "deposit": 85000,
+        "totalFinanced": 850000,
+        "remainingCapital": 620000,
+        "overdueAmount": 0,
+        "overdueDays": 0
+      },
+      "status": "active",
+      "portfolio": "Leasing",
+      "institution": "Tunisie Leasing",
+      "branch": "Tunis Centre",
+      "startDate": "2024-01-10",
+      "maturityDate": "2029-01-10",
+      "durationMonths": 60,
+      "insuranceActive": true,
+      "riskLevel": "Faible",
+      "created_at": "2024-01-10T00:00:00Z"
+    }
+  ],
+  "factoringDebtors": [
+    {
+      "id": "d-1",
+      "name": "ACIERIE DU NORD DEMO S.A.",
+      "registrationNumber": "B1812811996",
+      "taxId": "0001235F/A/M/000",
+      "address": "Zone Industrielle, Menzel Bourguiba, Tunisie",
+      "riskScore": 82,
+      "riskGrade": "B",
+      "approvedLimit": 500000,
+      "usedLimit": 145000,
+      "paymentDelayAverage": 45,
+      "status": "approved"
+    },
+    {
+      "id": "d-2",
+      "name": "OPERATEUR TELECOM DEMO S.A.",
+      "registrationNumber": "B1123451995",
+      "taxId": "0456123D/A/C/000",
+      "address": "Rue Asdrubal, Belvédère, Tunis, Tunisie",
+      "riskScore": 95,
+      "riskGrade": "A",
+      "approvedLimit": 1200000,
+      "usedLimit": 320000,
+      "paymentDelayAverage": 28,
+      "status": "approved"
+    },
+    {
+      "id": "d-3",
+      "name": "CERAMIQUE DEMO SARL",
+      "registrationNumber": "B245672002",
+      "taxId": "1023456K/B/M/000",
+      "address": "Zone Industrielle Charguia II, Tunis, Tunisie",
+      "riskScore": 68,
+      "riskGrade": "C",
+      "approvedLimit": 300000,
+      "usedLimit": 85000,
+      "paymentDelayAverage": 58,
+      "status": "approved"
+    }
+  ],
+  "factoringInvoices": [
+    {
+      "id": "inv-1",
+      "invoiceNumber": "FAC-2024-0891",
+      "debtorId": "d-1",
+      "debtorName": "ACIERIE DU NORD DEMO S.A.",
+      "amount": 75000,
+      "financedAmount": 67500,
+      "issueDate": "2024-02-01",
+      "dueDate": "2024-04-30",
+      "status": "overdue",
+      "overdueDays": 45,
+      "disputeStatus": "none"
+    },
+    {
+      "id": "inv-2",
+      "invoiceNumber": "FAC-2024-0942",
+      "debtorId": "d-2",
+      "debtorName": "OPERATEUR TELECOM DEMO S.A.",
+      "amount": 180000,
+      "financedAmount": 162000,
+      "issueDate": "2024-03-10",
+      "dueDate": "2024-06-10",
+      "status": "funded",
+      "overdueDays": 0,
+      "disputeStatus": "none"
+    },
+    {
+      "id": "inv-3",
+      "invoiceNumber": "FAC-2024-1015",
+      "debtorId": "d-3",
+      "debtorName": "CERAMIQUE DEMO SARL",
+      "amount": 45000,
+      "financedAmount": 38250,
+      "issueDate": "2024-01-15",
+      "dueDate": "2024-03-31",
+      "status": "disputed",
+      "overdueDays": 60,
+      "disputeStatus": "quality_defect"
+    }
+  ],
+  "factoringRequests": [],
+  "microfinanceClients": [],
+  "microfinanceLoans": [],
+  "microfinanceInstallments": [],
+  "litigationCases": [
+    {
+      "id": "LIT-2024-0001",
+      "debtor": {
+        "id": "D-145",
+        "name": "DEBITEUR ALPHA DEMO",
+        "siren": "0123456789",
+        "address": "12 Rue de la République",
+        "city": "Tunis",
+        "zip": "1000",
+        "contact": "M. Contact Demo 1",
+        "email": "contact@demo-sarl.example.test",
+        "phone": "+216 30 000 000"
+      },
+      "type": "payment_injunction",
+      "stage": "in_process",
+      "filingDate": "2024-01-15",
+      "lastUpdate": "2024-04-10",
+      "amount": {
+        "principal": 145000,
+        "interest": 8200,
+        "legalFees": 3500,
+        "bailiffFees": 850
+      },
+      "interestRate": 5.6,
+      "portfolio": "Factoring",
+      "institution": "Amen Bank",
+      "branch": "Tunis Belvédère",
+      "lawyer": {
+        "id": "l1",
+        "name": "Maître Demo Alpha",
+        "firm": "Cabinet Demo Alpha",
+        "phone": "+216 30 000 000",
+        "email": "contact@cabinet-demo-alpha.example.test",
+        "city": "Tunis",
+        "activeCasesCount": 14,
+        "created_at": "2024-01-01T00:00:00Z"
+      },
+      "bailiff": {
+        "id": "b1",
+        "name": "Huissier Demo 1",
+        "firm": "Étude Demo Nord",
+        "phone": "+216 30 000 000",
+        "email": "contact@etude-demo-nord.example.test",
+        "city": "Tunis",
+        "assignedActs": 28
+      },
+      "manager": "Agent Démo 1",
+      "riskLevel": "Critique",
+      "collateral": {
+        "type": "Hypothèque commerciale",
+        "value": 180000,
+        "status": "active"
+      },
+      "hearings": [
+        {
+          "id": "h1",
+          "date": "2026-06-15",
+          "time": "10:00",
+          "court": "Tribunal de Première Instance de Tunis",
+          "type": "Plaidoirie",
+          "judge": "Mme Ben Cheikh",
+          "status": "scheduled"
+        }
+      ],
+      "documents": [
+        {
+          "id": "d1",
+          "name": "Mise en demeure.pdf",
+          "category": "Lettre",
+          "status": "sent",
+          "date": "2024-01-10"
+        },
+        {
+          "id": "d2",
+          "name": "Requête injonction.pdf",
+          "category": "Procédure",
+          "status": "filed",
+          "date": "2024-01-15"
+        }
+      ],
+      "payments": []
+    },
+    {
+      "id": "LIT-2024-0002",
+      "debtor": {
+        "id": "D-201",
+        "name": "PARTICULIER DEMO 01",
+        "address": "4 Avenue Habib Bourguiba",
+        "city": "Sousse",
+        "zip": "4000",
+        "email": "particulier.demo@example.test",
+        "phone": "+216 30 000 000"
+      },
+      "type": "payment_injunction",
+      "stage": "enforcement",
+      "filingDate": "2023-11-20",
+      "lastUpdate": "2024-04-05",
+      "amount": {
+        "principal": 22000,
+        "interest": 1450,
+        "legalFees": 1200,
+        "bailiffFees": 620
+      },
+      "interestRate": 5.6,
+      "portfolio": "Leasing",
+      "institution": "Tunisie Leasing",
+      "branch": "Sousse Corniche",
+      "lawyer": {
+        "id": "l2",
+        "name": "Maître Demo Bravo",
+        "firm": "Cabinet Demo Bravo",
+        "phone": "+216 30 000 000",
+        "email": "contact@cabinet-demo-bravo.example.test",
+        "city": "Tunis",
+        "activeCasesCount": 9,
+        "created_at": "2024-01-01T00:00:00Z"
+      },
+      "bailiff": {
+        "id": "b2",
+        "name": "Huissier Demo 2",
+        "firm": "Étude Demo Centre",
+        "phone": "+216 30 000 000",
+        "email": "contact@etude-demo-centre.example.test",
+        "city": "Sousse",
+        "assignedActs": 19
+      },
+      "manager": "Agent Démo 2",
+      "riskLevel": "Moyen",
+      "collateral": {
+        "type": "Garantie matérielle (Véhicule)",
+        "value": 25000,
+        "status": "seizure_started"
+      },
+      "hearings": [],
+      "documents": [
+        {
+          "id": "d5",
+          "name": "Jugement définitif.pdf",
+          "category": "Jugement",
+          "status": "filed",
+          "date": "2024-02-14"
+        },
+        {
+          "id": "d6",
+          "name": "Procès-verbal de saisie.pdf",
+          "category": "Exécution",
+          "status": "filed",
+          "date": "2024-03-01"
+        }
+      ],
+      "payments": [
+        {
+          "id": "p1",
+          "date": "2024-04-05",
+          "amount": 5000,
+          "reference": "VIR-04052024",
+          "type": "partial"
+        }
+      ]
+    },
+    {
+      "id": "LIT-2024-0003",
+      "debtor": {
+        "id": "D-318",
+        "name": "TECH GLOBAL DEMO",
+        "siren": "0987654321",
+        "address": "15 Rue du Lac",
+        "city": "Tunis",
+        "zip": "1053",
+        "contact": "Mme Contact Demo 2",
+        "email": "finances@tech-global.example.test",
+        "phone": "+216 30 000 000"
+      },
+      "type": "summary_proceedings",
+      "stage": "pre_litigation",
+      "filingDate": "2024-04-01",
+      "lastUpdate": "2024-04-15",
+      "amount": {
+        "principal": 320000,
+        "interest": 2400,
+        "legalFees": 0,
+        "bailiffFees": 0
+      },
+      "interestRate": 5.6,
+      "portfolio": "Factoring",
+      "institution": "Amen Bank",
+      "branch": "Lac Tunis",
+      "lawyer": {
+        "id": "l1",
+        "name": "Maître Demo Alpha",
+        "firm": "Cabinet Demo Alpha",
+        "phone": "+216 30 000 000",
+        "email": "contact@cabinet-demo-alpha.example.test",
+        "city": "Tunis",
+        "activeCasesCount": 14,
+        "created_at": "2024-01-01T00:00:00Z"
+      },
+      "bailiff": {
+        "id": "b1",
+        "name": "Huissier Demo 1",
+        "firm": "Étude Demo Nord",
+        "phone": "+216 30 000 000",
+        "email": "contact@etude-demo-nord.example.test",
+        "city": "Tunis",
+        "assignedActs": 28
+      },
+      "manager": "Agent Démo 3",
+      "riskLevel": "Élevé",
+      "hearings": [],
+      "documents": [
+        {
+          "id": "d7",
+          "name": "Mise en demeure.pdf",
+          "category": "Lettre",
+          "status": "sent",
+          "date": "2024-04-02"
+        }
+      ],
+      "payments": []
+    },
+    {
+      "id": "LIT-2024-0004",
+      "debtor": {
+        "id": "D-422",
+        "name": "ENTREPRISE K DEMO",
+        "siren": "5566778899",
+        "address": "8 Rue Ibn Khaldoun",
+        "city": "Sfax",
+        "zip": "3000",
+        "phone": "+216 30 000 000"
+      },
+      "type": "payment_injunction",
+      "stage": "judgment_obtained",
+      "filingDate": "2023-09-10",
+      "lastUpdate": "2024-03-28",
+      "amount": {
+        "principal": 56000,
+        "interest": 3700,
+        "legalFees": 1800,
+        "bailiffFees": 0
+      },
+      "interestRate": 5.6,
+      "portfolio": "Microfinance",
+      "institution": "Enda Tamweel",
+      "branch": "Sfax El Jadida",
+      "lawyer": {
+        "id": "l2",
+        "name": "Maître Demo Bravo",
+        "firm": "Cabinet Demo Bravo",
+        "phone": "+216 30 000 000",
+        "email": "contact@cabinet-demo-bravo.example.test",
+        "city": "Tunis",
+        "activeCasesCount": 9,
+        "created_at": "2024-01-01T00:00:00Z"
+      },
+      "bailiff": {
+        "id": "b3",
+        "name": "Huissier Demo 3",
+        "firm": "Étude Demo Sud",
+        "phone": "+216 30 000 000",
+        "email": "contact@etude-demo-sud.example.test",
+        "city": "Sfax",
+        "assignedActs": 15
+      },
+      "manager": "Agent Démo 1",
+      "riskLevel": "Moyen",
+      "hearings": [],
+      "documents": [
+        {
+          "id": "d8",
+          "name": "Jugement TPI Sfax.pdf",
+          "category": "Jugement",
+          "status": "filed",
+          "date": "2024-03-20"
+        }
+      ],
+      "payments": []
+    },
+    {
+      "id": "LIT-2024-0005",
+      "debtor": {
+        "id": "D-501",
+        "name": "FONDS MARINA DEMO",
+        "siren": "1122334455",
+        "address": "3 Avenue de Carthage",
+        "city": "Tunis",
+        "zip": "1001",
+        "phone": "+216 30 000 000"
+      },
+      "type": "summary_proceedings",
+      "stage": "injunction_filed",
+      "filingDate": "2024-02-28",
+      "lastUpdate": "2024-04-12",
+      "amount": {
+        "principal": 89000,
+        "interest": 1100,
+        "legalFees": 2200,
+        "bailiffFees": 0
+      },
+      "interestRate": 5.6,
+      "portfolio": "Leasing",
+      "institution": "Tunisie Leasing",
+      "branch": "Tunis Centre",
+      "lawyer": {
+        "id": "l1",
+        "name": "Maître Demo Alpha",
+        "firm": "Cabinet Demo Alpha",
+        "phone": "+216 30 000 000",
+        "email": "contact@cabinet-demo-alpha.example.test",
+        "city": "Tunis",
+        "activeCasesCount": 14,
+        "created_at": "2024-01-01T00:00:00Z"
+      },
+      "bailiff": {
+        "id": "b1",
+        "name": "Huissier Demo 1",
+        "firm": "Étude Demo Nord",
+        "phone": "+216 30 000 000",
+        "email": "contact@etude-demo-nord.example.test",
+        "city": "Tunis",
+        "assignedActs": 28
+      },
+      "manager": "Agent Démo 4",
+      "riskLevel": "Élevé",
+      "hearings": [],
+      "documents": [
+        {
+          "id": "d9",
+          "name": "Requête référé.pdf",
+          "category": "Procédure",
+          "status": "filed",
+          "date": "2024-02-28"
+        }
+      ],
+      "payments": []
+    },
+    {
+      "id": "LIT-2023-0078",
+      "debtor": {
+        "id": "D-098",
+        "name": "ETOILE LOGISTIQUE DEMO",
+        "siren": "6677889900",
+        "address": "20 Rue de Marseille",
+        "city": "Tunis",
+        "zip": "1002",
+        "phone": "+216 30 000 000"
+      },
+      "type": "payment_injunction",
+      "stage": "closed_recovered",
+      "filingDate": "2023-05-12",
+      "lastUpdate": "2024-01-30",
+      "amount": {
+        "principal": 41000,
+        "interest": 2200,
+        "legalFees": 1500,
+        "bailiffFees": 800
+      },
+      "interestRate": 5.6,
+      "portfolio": "Microfinance",
+      "institution": "Enda Tamweel",
+      "branch": "Tunis Centre",
+      "lawyer": {
+        "id": "l2",
+        "name": "Maître Demo Bravo",
+        "firm": "Cabinet Demo Bravo",
+        "phone": "+216 30 000 000",
+        "email": "contact@cabinet-demo-bravo.example.test",
+        "city": "Tunis",
+        "activeCasesCount": 9,
+        "created_at": "2024-01-01T00:00:00Z"
+      },
+      "bailiff": {
+        "id": "b1",
+        "name": "Huissier Demo 1",
+        "firm": "Étude Demo Nord",
+        "phone": "+216 30 000 000",
+        "email": "contact@etude-demo-nord.example.test",
+        "city": "Tunis",
+        "assignedActs": 28
+      },
+      "manager": "Agent Démo 2",
+      "riskLevel": "Faible",
+      "hearings": [],
+      "documents": [],
+      "payments": [
+        {
+          "id": "p2",
+          "date": "2024-01-30",
+          "amount": 45500,
+          "reference": "VIR-30012024",
+          "type": "principal"
+        }
+      ]
+    }
+  ],
+  "lawyers": [
+    {
+      "id": "l1",
+      "name": "Maître Demo Alpha",
+      "firm": "Cabinet Demo Alpha",
+      "phone": "+216 30 000 000",
+      "email": "contact@cabinet-demo-alpha.example.test",
+      "city": "Tunis",
+      "activeCasesCount": 14,
+      "created_at": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "l2",
+      "name": "Maître Demo Bravo",
+      "firm": "Cabinet Demo Bravo",
+      "phone": "+216 30 000 000",
+      "email": "contact@cabinet-demo-bravo.example.test",
+      "city": "Tunis",
+      "activeCasesCount": 9,
+      "created_at": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "l3",
+      "name": "Maître Demo Charlie",
+      "firm": "Cabinet Demo Charlie",
+      "phone": "+216 30 000 000",
+      "email": "contact@cabinet-demo-charlie.example.test",
+      "city": "Sousse",
+      "activeCasesCount": 6,
+      "created_at": "2024-01-01T00:00:00Z"
+    },
+    {
+      "id": "l4",
+      "name": "Maître Demo Delta",
+      "firm": "Cabinet Demo Delta",
+      "phone": "+216 30 000 000",
+      "email": "contact@cabinet-demo-delta.example.test",
+      "city": "Sfax",
+      "activeCasesCount": 8,
+      "created_at": "2024-02-01T00:00:00Z"
+    }
+  ],
+  "bailiffs": [
+    {
+      "id": "b1",
+      "name": "Huissier Demo 1",
+      "firm": "Étude Demo Nord",
+      "phone": "+216 30 000 000",
+      "email": "contact@etude-demo-nord.example.test",
+      "city": "Tunis",
+      "assignedActs": 28
+    },
+    {
+      "id": "b2",
+      "name": "Huissier Demo 2",
+      "firm": "Étude Demo Centre",
+      "phone": "+216 30 000 000",
+      "email": "contact@etude-demo-centre.example.test",
+      "city": "Sousse",
+      "assignedActs": 19
+    },
+    {
+      "id": "b3",
+      "name": "Huissier Demo 3",
+      "firm": "Étude Demo Sud",
+      "phone": "+216 30 000 000",
+      "email": "contact@etude-demo-sud.example.test",
+      "city": "Sfax",
+      "assignedActs": 15
+    }
+  ],
+  "templates": [
+    {
+      "id": "tpl-1",
+      "name": "Rappel préventif J-3 (Échéance imminente)",
+      "channel": "sms",
+      "category": "preventif",
+      "subject": "Rappel de votre échéance",
+      "content": "Bonjour {{debiteur}}, votre échéance de {{montant}} TND arrive à échéance le {{echeance}}. Pour éviter des frais de retard, merci d'effectuer le règlement. Réf: {{reference}}.",
+      "variables": [
+        "debiteur",
+        "montant",
+        "echeance",
+        "reference"
+      ],
+      "active": true
+    },
+    {
+      "id": "tpl-2",
+      "name": "Relance 1er Niveau J+7 (Amiable courtois)",
+      "channel": "sms",
+      "category": "amiable",
+      "subject": "Échéance en retard",
+      "content": "Cher client {{debiteur}}, votre échéance de {{montant}} TND du {{echeance}} demeure impayée. Merci de régulariser par virement sur le RIB {{rib}} ou en agence. Contact: 30 000 000.",
+      "variables": [
+        "debiteur",
+        "montant",
+        "echeance",
+        "rib"
+      ],
+      "active": true
+    },
+    {
+      "id": "tpl-3",
+      "name": "Sommation ferme J+30 (Pré-contentieux)",
+      "channel": "email",
+      "category": "ferme",
+      "subject": "SOMMATION DE PAYER SOUS 48H - Dossier {{reference}}",
+      "content": "Madame, Monsieur {{debiteur}},\n\nMalgré nos précédentes relances, nous constatons le non-règlement de votre créance de {{montant}} TND exigible depuis le {{echeance}}.\n\nNous vous mettons formellement en demeure de régler ladite somme sous 48 heures ouvrables, faute de quoi votre dossier sera immédiatement transmis à notre direction du Contentieux pour assignation judiciaire et exécution forcée.\n\nDirection du Recouvrement RecovAI",
+      "variables": [
+        "debiteur",
+        "montant",
+        "echeance",
+        "reference"
+      ],
+      "active": true
+    },
+    {
+      "id": "tpl-4",
+      "name": "Mise en demeure par huissier J+45",
+      "channel": "lettre",
+      "category": "contentieux",
+      "subject": "MISE EN DEMEURE AVANT ACTION EN JUSTICE",
+      "content": "PAR EXPLOIT D'HUISSIER DE JUSTICE\n\nÀ la requête de l'institution bancaire / de crédit,\nNous sommons {{debiteur}}, domicilié(e) à {{adresse}}, de payer la somme principale de {{montant}} TND, outre les intérêts de retard conventionnels.\n\nÀ défaut, une requête en injonction de payer sera déposée auprès de Monsieur le Président du Tribunal de Première Instance compétent.",
+      "variables": [
+        "debiteur",
+        "adresse",
+        "montant"
+      ],
+      "active": true
+    }
+  ],
+  "escalationRules": [
+    {
+      "id": "esc-1",
+      "name": "Escalade Recouvreur vers Superviseur à J+30",
+      "triggerDays": 30,
+      "condition": "retard > 30 jours ET solde > 10 000 TND",
+      "action": "Réaffectation au chef de groupe + SMS ferme",
+      "targetLevel": "superviseur",
+      "active": true
+    },
+    {
+      "id": "esc-2",
+      "name": "Basculement Pré-contentieux à J+60",
+      "triggerDays": 60,
+      "condition": "retard > 60 jours ET absence d'engagement respecté",
+      "action": "Envoi d'une mise en demeure recommandée + Alerte Direction Risques",
+      "targetLevel": "directeur",
+      "active": true
+    },
+    {
+      "id": "esc-3",
+      "name": "Transmission Contentieux Judiciaire à J+90",
+      "triggerDays": 90,
+      "condition": "retard > 90 jours OU incident de paiement non régularisé",
+      "action": "Création automatique du dossier contentieux + Mandatement d'avocat",
+      "targetLevel": "contentieux",
+      "active": true
+    }
+  ],
+  "creditDossiers": [],
+  "relanceLogs": [],
+  "auditLogs": [],
+  "reportingDefinitions": [],
+  "generatedReports": [],
+  "scheduledReports": []
+}
